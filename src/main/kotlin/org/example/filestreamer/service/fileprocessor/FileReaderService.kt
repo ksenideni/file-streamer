@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.opencsv.CSVReader
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import lombok.RequiredArgsConstructor
 import org.example.filestreamer.dto.MyEvent
 import org.example.filestreamer.dto.NameAgeDto
@@ -41,23 +43,27 @@ class FileReaderService(val kafkaProducer: KafkaProducer) {
         val csvReader = CSVReader(FileReader(FILE_NAME))
         var nextLine: Array<String>?
 
-        val allColumnNames: Array<String> = csvReader.readNext()
-//        val columnToPositionMap = allColumnNames.withIndex().associate { it.value to it.index }
+        val allFileColumns: Array<String> = csvReader.readNext()
         val requiredNames = requiredColumns()
+
+        //почистить от очевидно несуществующих колонок лист с колонками для чтения
+        requiredNames.removeIf { !allFileColumns.contains(it) }
+        println("list after cleaning junk columns=${requiredNames}")
+
+
+        //определить позицию
+        val columnNameToPositionMap = requiredNames.associateWith {
+            getPositionUsingName(allFileColumns, it)
+        }
+
 //        val positions = requiredNames.map { getPositionUsingName(allColumnNames, it) }
         while ((csvReader.readNext().also { nextLine = it }) != null) {
-            val indexOfNameFromFile =
-                if (requiredNames.contains("name")) getPositionUsingName(allColumnNames, "name") else null
-            val nameFromFile = indexOfNameFromFile?.let { nextLine!![indexOfNameFromFile] }
-
-            val indexOfAgeFromFile =
-                if (requiredNames.contains("age")) getPositionUsingName(allColumnNames, "age") else null
-            val ageFromFile = indexOfAgeFromFile?.let { nextLine!![indexOfAgeFromFile] }
-            val partlyEvent = MyEvent(
-                name = nameFromFile,
-                age = ageFromFile?.toInt()
-            )
-            println("Partly event:$partlyEvent")
+            val newJson = buildJsonObject {
+                columnNameToPositionMap.forEach { (columnName, i) ->
+                    put(columnName, nextLine!![i])
+                }
+            }
+            println("new Json Without PreKnown Columns:$newJson")
         }
     }
 
@@ -65,12 +71,12 @@ class FileReaderService(val kafkaProducer: KafkaProducer) {
         return allColumnNames.indexOf(columnName)
     }
 
-    private fun requiredColumns(): List<String> {
-//        return listOf("name")
-//        return listOf("age")
-//        return listOf("qwerty")
-//        return listOf("name", "age")
-        return listOf("age", "name")
+    private fun requiredColumns(): MutableList<String> {
+//        return mutableListOf("name")
+//        return mutableListOf("age")
+        return mutableListOf("qwerty")
+//        return mutableListOf("name", "age")
+//        return mutableListOf("age", "name")
     }
 
     private fun parseFirstRow(lines: List<String>) {
