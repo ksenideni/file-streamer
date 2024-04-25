@@ -1,6 +1,7 @@
 package api
 
 import com.opencsv.CSVReader
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.io.InputStream
@@ -11,7 +12,7 @@ class FileStreamer {
     /***
      * inputStream стрим CSV-файла (todo по идее excel тоже зайдет)
      */
-    fun readFromInputStream(input: InputStream, selectedColumns: List<String>) {
+    fun readFromInputStream(input: InputStream, selectedColumns: List<String>): List<JsonObject> {
         val csvReader = CSVReader(InputStreamReader(input))
         var nextLine: Array<String>?
 
@@ -21,7 +22,7 @@ class FileStreamer {
 
         val mutableSelectedColumns = selectedColumns.toMutableList()
         mutableSelectedColumns.removeIf { !fileColumns.contains(it) }
-        if (mutableSelectedColumns.isEmpty()) return
+        if (mutableSelectedColumns.isEmpty()) return listOf()
         println("list after cleaning junk columns=${mutableSelectedColumns}")
 
         //определить позицию
@@ -29,16 +30,21 @@ class FileStreamer {
             getPositionUsingName(fileColumns, it)
         }
 
+        val jsonList = ArrayList<JsonObject>()
         while ((csvReader.readNext().also { nextLine = it }) != null) {
-            val newJson = constructJson(columnNameToPositionMap, nextLine!!)
-            println("new Json Without PreKnown Columns:$newJson")
+            jsonList.add(constructJson(columnNameToPositionMap, nextLine!!))
         }
+        return jsonList
     }
 
-    private fun constructJson(columnNameToPositionMap: Map<String, Int>, nextLine: Array<String>) = buildJsonObject {
-        columnNameToPositionMap.forEach {
-            put(it.key, nextLine[it.value])
+    private fun constructJson(columnNameToPositionMap: Map<String, Int>, nextLine: Array<String>): JsonObject {
+        val jsonObj = buildJsonObject {
+            columnNameToPositionMap.forEach {
+                put(it.key, nextLine[it.value])
+            }
         }
+        println("new Json Without PreKnown Columns:$jsonObj")
+        return jsonObj
     }
 
     private fun getPositionUsingName(allColumnNames: Array<String>, columnName: String): Int {
