@@ -27,9 +27,9 @@ class FileController(
     }
 
     @PostMapping("/upload")
-    fun uploadFile(@RequestParam("file") file: MultipartFile): String {
+    fun uploadFile(@RequestParam("file") file: MultipartFile, @RequestParam requiredColumns: List<String>): String {
         val status = fileReaderService.saveFile(file)
-        fileSendingTaskService.createSendingTask(file)
+        fileSendingTaskService.createSendingTask(file, requiredColumns)
         return status
     }
 }

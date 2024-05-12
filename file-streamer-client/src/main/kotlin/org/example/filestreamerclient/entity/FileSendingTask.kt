@@ -8,6 +8,7 @@ import org.springframework.data.relational.core.mapping.Table
 class FileSendingTask(
     @Id
     var id: Long? = null,
-    val fileName: String,
-    val status: TaskStatus
+    var fileName: String,
+    var status: TaskStatus,
+    var requiredColumns: String
 )

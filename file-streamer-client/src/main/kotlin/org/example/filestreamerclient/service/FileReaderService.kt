@@ -22,6 +22,15 @@ class FileReaderService(
         readFileV2(requiredColumns)
     }
 
+    fun readFile(fileName: String, requiredColumns: List<String>) {
+        println("requiredColumns:$requiredColumns")
+        val input = File("$FILE_PATH$fileName").inputStream()
+        val jsons = fileStreamer.readFromInputStream(input, requiredColumns)
+        jsons.forEach {
+            kafkaProducer.sendEvent(it.toString())
+        }
+    }
+
     fun readFileV2(requiredColumns: List<String>) {
         println("requiredColumns:$requiredColumns")
         val input = File(FILE_NAME).inputStream()

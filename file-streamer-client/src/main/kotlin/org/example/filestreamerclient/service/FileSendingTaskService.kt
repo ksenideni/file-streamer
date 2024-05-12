@@ -11,11 +11,18 @@ class FileSendingTaskService(
     private val fileSendingTaskRepository: FileSendingTaskRepository
 ) {
 
-    fun createSendingTask(file: MultipartFile) {
+    fun createSendingTask(file: MultipartFile, requiredColumns: List<String>) {
         val task = FileSendingTask(
             fileName = file.name,
-            status = TaskStatus.NEW
+            status = TaskStatus.NEW,
+            requiredColumns = requiredColumns.toString()
         )
         fileSendingTaskRepository.save(task)
     }
+
+    fun findNewTask() = fileSendingTaskRepository.findFirstNewTask()
+
+    fun updateTaskStatus(task: FileSendingTask, newStatus: TaskStatus) =
+        fileSendingTaskRepository.save(task.apply { status = newStatus })
+
 }
