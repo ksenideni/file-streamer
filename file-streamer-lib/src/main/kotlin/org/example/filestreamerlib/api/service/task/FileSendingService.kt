@@ -1,13 +1,14 @@
-package org.example.filestreamerclient.service
+package org.example.filestreamerlib.api.service.task
 
-import org.example.filestreamerclient.dto.TaskStatus
-import org.example.filestreamerclient.entity.FileSendingTask
-import org.example.filestreamerclient.repository.FileSendingTaskRepository
+
+import org.example.filestreamerlib.api.dao.FileSendingTaskRepository
+import org.example.filestreamerlib.api.entity.FileSendingTask
+import org.example.filestreamerlib.api.entity.TaskStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
 @Service
-class FileSendingTaskService(
+class FileSendingService(
     private val fileSendingTaskRepository: FileSendingTaskRepository
 ) {
 

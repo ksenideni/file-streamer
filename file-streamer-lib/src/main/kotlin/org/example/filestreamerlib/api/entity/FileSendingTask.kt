@@ -1,6 +1,5 @@
-package org.example.filestreamerclient.entity
+package org.example.filestreamerlib.api.entity
 
-import org.example.filestreamerclient.dto.TaskStatus
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 

@@ -17,3 +17,5 @@ spring:
     username: postgres_user
     password: postgres_password
     driver-class-name: org.postgresql.Driver
+
+my.topic: names

@@ -1,6 +1,6 @@
-package org.example.filestreamerclient.repository
+package org.example.filestreamerlib.api.dao
 
-import org.example.filestreamerclient.entity.FileSendingTask
+import org.example.filestreamerlib.api.entity.FileSendingTask
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 
